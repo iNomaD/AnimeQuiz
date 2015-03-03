@@ -27,8 +27,8 @@ Rectangle{
         Image{
             width: parent.width
             height:parent.height*0.4
-            source: "file:///"+game.getPath()+"Level0/87/87-5-optimize_d.jpg"
-
+            source: game.getAssetsPath()+"data/Level0/62/62-3-optimize_d.jpg"
+            //source: "assets:/data/Level0/62/62-3-optimize_d.jpg"
         }
         Column{
             width: parent.width

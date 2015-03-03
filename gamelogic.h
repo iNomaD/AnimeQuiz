@@ -15,7 +15,7 @@ public:
     int getDifficulty() const;
 
     Q_INVOKABLE void startGame();
-    Q_INVOKABLE QString getPath();
+    Q_INVOKABLE QString getAssetsPath();
 private:
     int difficulty;
 

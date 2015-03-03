@@ -1,8 +1,10 @@
 TEMPLATE = app
 
-folder_01.source = data
-folder_01.target = data
-DEPLOYMENTFOLDERS = folder_01
+android {
+    deployment.files=data
+    deployment.path=/assets
+    INSTALLS += deployment
+}
 
 QT += qml quick widgets
 
