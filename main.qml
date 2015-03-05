@@ -13,6 +13,9 @@ ApplicationWindow {
     GameLogic{
         id: game
         difficulty: 3
+
+        onLevelChanged: game_p.levelChanged();
+        onGameOver: pagelist.state = "menu";
     }
 
     /*menuBar: MenuBar {
