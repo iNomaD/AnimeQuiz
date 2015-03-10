@@ -1,9 +1,9 @@
 import QtQuick 2.0
 
-Rectangle{
+Item{
     id: inner
     anchors.fill: parent
-    color: "lightgreen"
+    //color: "lightgreen"
 
     signal levelChanged()
     onLevelChanged: {
@@ -14,6 +14,13 @@ Rectangle{
         answers.itemAt(3).variant = game.getAns(4);
     }
 
+    Image {
+        id: background
+        anchors.fill: parent
+        source: game.getAssetsPath()+"data/img/bg2.jpg"
+        fillMode: Image.PreserveAspectCrop
+    }
+
     Item{
         anchors.fill: parent
         Row{
@@ -21,10 +28,25 @@ Rectangle{
             id: topBar
             width: parent.width
             height: parent.height*0.2
-            Rectangle{
+
+            Item{
                 width: parent.width*0.4
                 height: parent.height
-                color: "blue"
+                //color: "blue"
+                Column{
+                    anchors.left: parent.left
+                    anchors.leftMargin: parent.width*0.1
+                    anchors.top: parent.top
+                    anchors.topMargin: parent.height*0.1
+                    spacing: parent.height*0.4
+
+                    Text{
+                        text: "Угадано: "+game.guessed
+                    }
+                    Text{
+                        text: "Время: "+game.allTime
+                    }
+                }
             }
             Item{
                 width: parent.width*0.2
@@ -41,10 +63,10 @@ Rectangle{
                     }
                 }
             }
-            Rectangle{
+            Item{
                 width: parent.width*0.4
                 height: parent.height
-                color: "lightpink"
+                //color: "lightpink"
             }
         }
         Image{
@@ -52,29 +74,33 @@ Rectangle{
             id: picture
             width: parent.width
             height:parent.height*0.4
-            //source: game.getAssetsPath()+"data/Level0/62/62-3-optimize_d.jpg"
-            //source: "assets:/data/Level0/62/62-3-optimize_d.jpg"
         }
 
         Column{
             anchors.top: picture.bottom
-            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width*0.98
             height: parent.height*0.4
-            spacing: height*0.02
-            anchors.topMargin: height*0.02
+            spacing: height*0.03
+            anchors.topMargin: height*0.03
 
             Repeater{
                 id: answers
                 model: 4
                 Rectangle{
                     width: parent.width
-                    height: parent.height*0.23
+                    height: parent.height*0.22
                     color: "red"
                     radius: height/3
                     property string variant: ""
+
                     Text{
-                        anchors.centerIn: parent
+                        anchors.fill: parent
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
                         text: parent.variant
+                        maximumLineCount: 2
+                        wrapMode: Text.Wrap
                     }
                     MouseArea{
                         anchors.fill: parent

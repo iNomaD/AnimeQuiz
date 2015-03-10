@@ -1,6 +1,7 @@
 #include "gamelogic.h"
 #include <QDebug>
 #include <QDir>
+#include "QTime"
 
 //#define Q_OS_ANDROID
 
@@ -19,6 +20,12 @@ GameLogic::GameLogic(QObject *parent) : QObject(parent)
 #endif
     qDebug()<<"Assets path: "<<imagePath;
     assetsPath = imagePath;
+
+    loadData();
+
+    //для рандома
+    QTime midnight(0,0,0);
+    qsrand(midnight.secsTo(QTime::currentTime()));
 }
 
 GameLogic::~GameLogic()
@@ -38,7 +45,10 @@ int GameLogic::getTimeLeft() const
 
 void GameLogic::startGame()
 {
-    qDebug()<<"Game started!";
+    qDebug()<<"Game started! Titles: "<<data.size();
+    allTimeD.setHMS(0,0,0);
+    setAllTime(allTimeD.toString("hh:mm:ss"));
+    setGuessed(0);
     nextLevel();
 }
 
@@ -51,16 +61,16 @@ QString GameLogic::getAns(int x)
 {
     switch(x){
     case 1:
-        return ans1;
+        return ans[0];
         break;
     case 2:
-        return ans2;
+        return ans[1];
         break;
     case 3:
-        return ans3;
+        return ans[2];
         break;
     case 4:
-        return ans4;
+        return ans[3];
         break;
     default:
         return "???";
@@ -74,7 +84,8 @@ QString GameLogic::loadPicture()
 
 void GameLogic::chosen(int x)
 {
-    if(x == (correct-1)){
+    if(x == (correct)){
+        setGuessed(getGuessed()+1);
         nextLevel();
         emit levelChanged();
     }
@@ -83,18 +94,80 @@ void GameLogic::chosen(int x)
     }
 }
 
+int GameLogic::getGuessed() const
+{
+    return guessed;
+}
+
+QString GameLogic::getAllTime() const
+{
+    return allTime;
+}
+
 void GameLogic::nextLevel()
 {
     qDebug()<<"New level";
-    picture = "data/Level0/26/26-2-optimize_d.jpg";
-    ans1 = "wrong1";
-    ans2 = "wrong2";
-    ans3 = "wrong3";
-    ans4 = "correct";
-    correct = 4;
+    /*
+    foreach(AnimeTitle at, data){
+        qDebug()<<at.name<<" "<<at.top<<" "<<at.year;
+        foreach(QString picture, at.pic){
+            qDebug()<<picture;
+        }
+    }*/
+
+    ans[0] = ans[1] = ans[2] = ans[3] = "NO DATA";
+    if(data.size() < 4){
+        correct = -1;
+    }
+    else{
+        //выбираем анимешку
+        int picked;
+        AnimeTitle at;
+        while(true){
+            picked = qrand() % data.size();
+            at = data.at(picked);
+            qDebug()<<at.name<<at.top;
+            int maxTop = 100;
+            switch(difficulty){
+                case 1:
+                    maxTop = 100;
+                    break;
+                case 2:
+                    maxTop = 200;
+                    break;
+                case 3:
+                    maxTop = 300;
+                    break;
+            }
+
+            if((at.top).toInt() < maxTop){
+                break;
+            }
+        }
+
+        //перемешиваем ответы
+        correct = qrand()%4;
+        ans[correct] = at.name + " (" + at.year + ")";
+        picture = at.pic.at(qrand() % at.pic.size());
+
+        for(int i=0; i<4; ++i){
+            if(i != correct){
+                bool again = true;
+                while(again){
+                    again = false;
+                    AnimeTitle at2 = data.at(qrand() % data.size());
+                    for(int j=0; j<4; ++j){
+                        if(ans[j] == at2.name + " (" + at2.year + ")"){
+                            again = true;
+                        }
+                    }
+                    ans[i] = at2.name + " (" + at2.year + ")";
+                }
+            }
+        }
+    }
 
     emit levelChanged();
-
     setTimeLeft(15);
     timer1->start(1000);
 }
@@ -106,8 +179,48 @@ void GameLogic::finishGame()
     qDebug()<<"Game Over!";
 }
 
+void GameLogic::loadData()
+{
+    QDir dirs;
+    dirs.setPath(QDir::currentPath()+"/data/Level0");
+    #if defined(Q_OS_ANDROID)
+        dirs.setPath("assets:/data/Level0");
+    #endif
+
+    qDebug()<<"GAME LOADING DATA FROM "+dirs.currentPath();
+    foreach(QString directory, dirs.entryList()){
+        //qDebug()<<directory;
+        if(directory != "." && directory != ".."){
+            AnimeTitle newTitle;
+
+            QDir title = dirs;
+            title.cd(directory);
+
+            QFile info(title.path()+"/info.txt");
+            info.open(QIODevice::ReadOnly);
+            QString all = info.readAll();
+            QStringList line = all.split("\r\n");
+            newTitle.name = line[0];
+            newTitle.year = line[1];
+            newTitle.top = line[2];
+            info.close();
+
+            QStringList list = title.entryList(QStringList(QString("*.jpg")));
+            //не добавляем если меньше 3 картинок!
+            if(list.size() >= 3){
+                foreach(QString file, list){
+                    newTitle.pic.append("data/Level0/"+directory+"/"+file);
+                }
+                data.append(newTitle);
+            }
+        }
+    }
+}
+
 void GameLogic::timer1000ms()
 {
+    allTimeD = allTimeD.addSecs(1);
+    setAllTime(allTimeD.toString("hh:mm:ss"));
     setTimeLeft(timeLeft-1);
     if(timeLeft == 0){
         finishGame();
@@ -133,4 +246,19 @@ void GameLogic::setTimeLeft(int arg)
         emit timeLeftChanged(arg);
     }
 }
+void GameLogic::setGuessed(int arg)
+{
+    if (guessed == arg)
+        return;
 
+    guessed = arg;
+    emit guessedChanged(arg);
+}
+void GameLogic::setAllTime(QString arg)
+{
+    if (allTime == arg)
+        return;
+
+    allTime = arg;
+    emit allTimeChanged(arg);
+}

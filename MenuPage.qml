@@ -7,6 +7,13 @@ Rectangle {
     width: parent.width
     height: parent.height
 
+    Image {
+        id: background
+        anchors.fill: parent
+        source: game.getAssetsPath()+"data/img/bg1.jpeg"
+        fillMode: Image.PreserveAspectCrop
+    }
+
     Column{
         anchors.centerIn: parent
         spacing: 5
