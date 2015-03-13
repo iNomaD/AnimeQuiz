@@ -32,6 +32,11 @@ public:
     Q_INVOKABLE QString getAns(int x);
     Q_INVOKABLE QString loadPicture();
     Q_INVOKABLE void chosen(int x);
+    Q_INVOKABLE int getCorrect();
+    Q_INVOKABLE int getIncorrect();
+    Q_INVOKABLE int getFifty(int x);
+    Q_INVOKABLE void fiftyfifty();
+    Q_INVOKABLE void skip();
 
     int getDifficulty() const;
     int getTimeLeft() const;
@@ -39,31 +44,39 @@ public:
     QString getAllTime() const;
 
 private:
-    QVector<AnimeTitle> data;
     int difficulty;
     int timeLeft;
     int guessed;
     QString allTime;
 
-    QTimer *timer1;
+    int correct;
+    int incorrect;
+    int fifty[2];
+    QVector<AnimeTitle> data;
     QString assetsPath;
     QString picture;
     QString ans[4];
-    int correct;
     QTime allTimeD;
+    QTimer *timer1;
 
     void nextLevel();
     void finishGame();
     void loadData();
+    void delay( int millisecondsToWait );
 
 signals:
 
     void difficultyChanged(int arg);
     void levelChanged();
+    void gameStart();
     void gameOver();
     void timeLeftChanged(int arg);
     void guessedChanged(int arg);
     void allTimeChanged(QString arg);
+    void showRight();
+    void showWrong();
+    void hideFiftyfifty();
+    void hideSkip();
 
 public slots:
     void setDifficulty(int arg);

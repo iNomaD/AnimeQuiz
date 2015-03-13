@@ -7,6 +7,11 @@ Rectangle {
     width: parent.width
     height: parent.height
 
+    signal gameOver()
+    onGameOver: {
+       welcome.text = "Game Over\n Score: "+game.guessed
+    }
+
     Image {
         id: background
         anchors.fill: parent
@@ -15,39 +20,47 @@ Rectangle {
     }
 
     Column{
+        width: parent.width*0.7
+        height: parent.height*0.3
         anchors.centerIn: parent
         spacing: 5
 
-        TextEdit {
-            id: textEdit1
-            width: 111
-            height: 20
-            text: qsTr("Welcome guy")
+        Text {
+            id: welcome
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            width: parent.width
+            height: parent.height/3
+            text: "Welcome to AnimeQuiz"
             font.bold: true
             font.family: "Courier"
-            font.pixelSize: 18
+            font.pixelSize: 21
+            wrapMode: Text.Wrap
         }
         Rectangle {
             id: newgame
-            width: 184
-            height: 40
+            width: parent.width
+            height: parent.height*0.27
             color: "#f81919"
             border.color: "black"
             border.width: 5
-            radius: 10
+            radius: height/3
 
             Text {
-                id: text1
-                x: 42
-                y: 8
-                width: 90
-                height: 24
-                text: qsTr("New Game")
-                font.pixelSize: 17
+                anchors.fill: parent
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                text: "NEW GAME"
+                font.bold: true
+                font.family: "Courier"
+                font.pixelSize: 18
+                wrapMode: Text.Wrap
             }
 
             MouseArea{
                 anchors.fill:parent
+                onEntered: parent.border.color = "gold"
+                onExited: parent.border.color = "black"
                 onClicked: {
                     game.startGame();
                     pagelist.state = "game";    
@@ -56,32 +69,30 @@ Rectangle {
         }
 
         Rectangle {
-            id: options
-            width: 184
-            height: 40
+            id: exit
+            width: parent.width
+            height: parent.height*0.27
             color: "#f81919"
             border.color: "black"
             border.width: 5
-            radius: 10
+            radius: height/3
 
             Text {
-                id: text2
-                x: 42
-                y: 8
-                width: 90
-                height: 24
-                text: qsTr("Options")
-                font.pixelSize: 17
+                anchors.fill: parent
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                text: "EXIT"
+                font.bold: true
+                font.family: "Courier"
+                font.pixelSize: 18
+                wrapMode: Text.Wrap
             }
             MouseArea{
                 anchors.fill:parent
-                onClicked: {
-
-                }
+                onEntered: parent.border.color = "gold"
+                onExited: parent.border.color = "black"
+                onClicked: Qt.quit();
             }
-        }
-        Text {
-            text: "My property is: " + game.difficulty
         }
 
     }

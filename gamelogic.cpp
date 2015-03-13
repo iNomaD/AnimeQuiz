@@ -2,12 +2,15 @@
 #include <QDebug>
 #include <QDir>
 #include "QTime"
+#include <QCoreApplication>
+#include <QEventLoop>
 
 //#define Q_OS_ANDROID
 
 GameLogic::GameLogic(QObject *parent) : QObject(parent)
 {
     difficulty = 2;
+    incorrect = -1;
     timer1 = new QTimer(this);
     connect(timer1, SIGNAL(timeout()), this, SLOT(timer1000ms()));
 
@@ -27,12 +30,19 @@ GameLogic::GameLogic(QObject *parent) : QObject(parent)
     QTime midnight(0,0,0);
     qsrand(midnight.secsTo(QTime::currentTime()));
 }
-
 GameLogic::~GameLogic()
 {
     delete timer1;
 }
 
+void GameLogic::delay( int millisecondsToWait )
+{
+    QTime dieTime = QTime::currentTime().addMSecs( millisecondsToWait );
+    while( QTime::currentTime() < dieTime )
+    {
+        QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+    }
+}
 int GameLogic::getDifficulty() const
 {
     return difficulty;
@@ -49,6 +59,7 @@ void GameLogic::startGame()
     allTimeD.setHMS(0,0,0);
     setAllTime(allTimeD.toString("hh:mm:ss"));
     setGuessed(0);
+    emit gameStart();
     nextLevel();
 }
 
@@ -84,12 +95,17 @@ QString GameLogic::loadPicture()
 
 void GameLogic::chosen(int x)
 {
-    if(x == (correct)){
+    if(x == fifty[0] || x == fifty[1]){
+        return;
+    }
+    else if(x == (correct)){
         setGuessed(getGuessed()+1);
+        emit showRight();
+        delay(300);
         nextLevel();
-        emit levelChanged();
     }
     else{
+        incorrect = x;
         finishGame();
     }
 }
@@ -114,7 +130,7 @@ void GameLogic::nextLevel()
             qDebug()<<picture;
         }
     }*/
-
+    fifty[0] = fifty[1] = -1; //не юзали 50 на 50
     ans[0] = ans[1] = ans[2] = ans[3] = "NO DATA";
     if(data.size() < 4){
         correct = -1;
@@ -175,6 +191,10 @@ void GameLogic::nextLevel()
 void GameLogic::finishGame()
 {
     timer1->stop();
+    if(incorrect != -1) emit showWrong();
+    else emit showRight();
+    incorrect = -1;
+    delay(1000);
     emit gameOver();
     qDebug()<<"Game Over!";
 }
@@ -261,4 +281,33 @@ void GameLogic::setAllTime(QString arg)
 
     allTime = arg;
     emit allTimeChanged(arg);
+}
+int GameLogic::getCorrect()
+{
+    return correct;
+}
+int GameLogic::getIncorrect()
+{
+    return incorrect;
+}
+int GameLogic::getFifty(int x)
+{
+    if(x==0) return fifty[0];
+    else if(x==1) return fifty[1];
+    else return -1;
+}
+
+void GameLogic::fiftyfifty()
+{
+    fifty[0] = qrand() % 4;
+    while(fifty[0] == correct) fifty[0] = qrand() % 4;
+    fifty[1] = qrand() % 4;
+    while(fifty[1] == correct || fifty[1] == fifty[0]) fifty[1] = qrand() % 4;
+    emit hideFiftyfifty();
+}
+
+void GameLogic::skip()
+{
+    emit hideSkip();
+    nextLevel();
 }

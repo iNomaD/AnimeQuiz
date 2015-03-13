@@ -14,8 +14,16 @@ ApplicationWindow {
         id: game
         difficulty: 3
 
+        onShowRight: game_p.showRight();
+        onShowWrong: game_p.showWrong();
         onLevelChanged: game_p.levelChanged();
-        onGameOver: pagelist.state = "menu";
+        onHideSkip: game_p.hideSkip();
+        onHideFiftyfifty: game_p.hideFiftyfifty();
+        onGameStart: game_p.gameStart();
+        onGameOver: {
+            pagelist.state = "menu";
+            menu_p.gameOver();
+        }
     }
 
     /*menuBar: MenuBar {
@@ -45,7 +53,7 @@ ApplicationWindow {
         anchors.fill: parent
 
         MenuPage{
-            id: menu
+            id: menu_p
         }
         GamePage{
             id: game_p
@@ -55,11 +63,11 @@ ApplicationWindow {
             State {
                 name: "menu"
                 PropertyChanges { target: game_p; visible:false; }
-                PropertyChanges { target: menu; visible:true; }
+                PropertyChanges { target: menu_p; visible:true; }
             },
             State {
                 name: "game"
-                PropertyChanges { target: menu; visible:false; }
+                PropertyChanges { target: menu_p; visible:false; }
                 PropertyChanges { target: game_p; visible:true; }
             }
         ]
