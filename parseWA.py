@@ -33,8 +33,21 @@ def parseFromWAurl(waurl):
         photolist = re.findall(r'screenshot_number=\d+', photos);
         print(position + ' ' + name + ' ' +url)
 
+        #<КОСТЫЛЬ>
+        if position == '364':
+            print('skipp')
+            continue
+        #</КОСТЫЛЬ>
+
         #если есть фотки, то создаём папку и записываем название
         if photolist:
+            #загружаем 3 фотки
+            size = len(photolist)
+            if size>3:
+                size=3
+            if size<3: #если меньше 3, то не сохраняем
+                continue
+
             if not os.path.exists('data'):
                 os.mkdir('data')
             if not os.path.exists('data/'+id):
@@ -44,10 +57,6 @@ def parseFromWAurl(waurl):
             file.write(name+'\n'+year+'\n'+position)
             file.close()
 
-            #загружаем фотки
-            size = len(photolist)
-            if size>5:
-                size=5
             for index in range(size):
                 photourl = 'http://www.world-art.ru/animation/animation_photos.php?id='+id+'&&'+photolist[index]
                 page3 = GetURL(photourl)
@@ -62,4 +71,6 @@ def parseFromWAurl(waurl):
 parseFromWAurl('http://www.world-art.ru/animation/rating_top.php?limit_1=000')
 parseFromWAurl('http://www.world-art.ru/animation/rating_top.php?limit_1=100')
 parseFromWAurl('http://www.world-art.ru/animation/rating_top.php?limit_1=200')
+parseFromWAurl('http://www.world-art.ru/animation/rating_top.php?limit_1=300')
+parseFromWAurl('http://www.world-art.ru/animation/rating_top.php?limit_1=400')
 print('Script has finished successfully!')

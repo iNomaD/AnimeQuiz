@@ -1,8 +1,15 @@
-import QtQuick 2.0
+import QtQuick 2.4
 
 Item{
     id: inner
     anchors.fill: parent
+
+    Keys.onReleased: {
+        if (event.key == Qt.Key_Back) {
+            event.accepted = true;
+            game.abortGame();
+        }
+    }
 
     signal gameStart()
     onGameStart: {
@@ -41,7 +48,8 @@ Item{
     Image {
         id: background
         anchors.fill: parent
-        source: game.getAssetsPath()+"data/img/bg2.jpg"
+        source: "images/img/bg2.jpg"
+        //source: game.getAssetsPath()+"data/img/bg2.jpg"
         fillMode: Image.PreserveAspectCrop
     }
 

@@ -3,14 +3,15 @@
 #include <QDir>
 #include "QTime"
 #include <QCoreApplication>
-#include <QEventLoop>
 
 //#define Q_OS_ANDROID
 
 GameLogic::GameLogic(QObject *parent) : QObject(parent)
 {
-    difficulty = 2;
+    setDifficulty(1);
     incorrect = -1;
+    pause = false;
+    abort = false;
     timer1 = new QTimer(this);
     connect(timer1, SIGNAL(timeout()), this, SLOT(timer1000ms()));
 
@@ -55,7 +56,7 @@ int GameLogic::getTimeLeft() const
 
 void GameLogic::startGame()
 {
-    qDebug()<<"Game started! Titles: "<<data.size();
+    qDebug()<<"Game started! Titles: "<<data.size()<<"Difficulty: "<<difficulty;
     allTimeD.setHMS(0,0,0);
     setAllTime(allTimeD.toString("hh:mm:ss"));
     setGuessed(0);
@@ -95,10 +96,11 @@ QString GameLogic::loadPicture()
 
 void GameLogic::chosen(int x)
 {
-    if(x == fifty[0] || x == fifty[1]){
+    if(x == fifty[0] || x == fifty[1] || pause){
         return;
     }
-    else if(x == (correct)){
+    pause = true;
+    if(x == (correct)){
         setGuessed(getGuessed()+1);
         emit showRight();
         delay(300);
@@ -120,16 +122,49 @@ QString GameLogic::getAllTime() const
     return allTime;
 }
 
+AnimeTitle GameLogic::pickAnime()
+{
+    int maxTop=500, minYear=1900;
+    if(difficulty <1 || difficulty>3){
+        difficulty = 3;
+    }
+    switch(difficulty){
+    case 1: //229 штук
+        maxTop = 300;
+        minYear = 2000;
+        break;
+    case 2: // +151 штук
+        maxTop = 500;
+        minYear = 2000;
+        break;
+    case 3: // +70 штук
+        maxTop = 500;
+        minYear = 1900;
+        break;
+    }
+    AnimeTitle at;
+    while(true){
+        at = data.at(qrand() % data.size());
+        if((at.top).toInt() <= maxTop && (at.year).toInt() >= minYear){
+            break;
+        }
+        //qDebug()<<at.name<<at.top<<"NE OK";
+    }
+    return at;
+}
+
 void GameLogic::nextLevel()
 {
     qDebug()<<"New level";
-    /*
+    /*int count = 0;
     foreach(AnimeTitle at, data){
-        qDebug()<<at.name<<" "<<at.top<<" "<<at.year;
-        foreach(QString picture, at.pic){
-            qDebug()<<picture;
+        if((at.year).toInt()>=2000 && (at.top).toInt()>300){
+            count++;
+            //qDebug()<<at.name<<" "<<at.top<<" "<<at.year;
         }
-    }*/
+    }
+    qDebug()<<count;*/
+
     fifty[0] = fifty[1] = -1; //не юзали 50 на 50
     ans[0] = ans[1] = ans[2] = ans[3] = "NO DATA";
     if(data.size() < 4){
@@ -137,29 +172,8 @@ void GameLogic::nextLevel()
     }
     else{
         //выбираем анимешку
-        int picked;
-        AnimeTitle at;
-        while(true){
-            picked = qrand() % data.size();
-            at = data.at(picked);
-            qDebug()<<at.name<<at.top;
-            int maxTop = 100;
-            switch(difficulty){
-                case 1:
-                    maxTop = 100;
-                    break;
-                case 2:
-                    maxTop = 200;
-                    break;
-                case 3:
-                    maxTop = 300;
-                    break;
-            }
-
-            if((at.top).toInt() < maxTop){
-                break;
-            }
-        }
+        AnimeTitle at = pickAnime();
+        qDebug()<<at.name<<at.top;
 
         //перемешиваем ответы
         correct = qrand()%4;
@@ -171,7 +185,7 @@ void GameLogic::nextLevel()
                 bool again = true;
                 while(again){
                     again = false;
-                    AnimeTitle at2 = data.at(qrand() % data.size());
+                    AnimeTitle at2 = pickAnime();
                     for(int j=0; j<4; ++j){
                         if(ans[j] == at2.name + " (" + at2.year + ")"){
                             again = true;
@@ -186,15 +200,18 @@ void GameLogic::nextLevel()
     emit levelChanged();
     setTimeLeft(15);
     timer1->start(1000);
+    pause = false;
 }
 
 void GameLogic::finishGame()
 {
     timer1->stop();
-    if(incorrect != -1) emit showWrong();
-    else emit showRight();
-    incorrect = -1;
-    delay(1000);
+    if(!abort){
+        if(incorrect != -1) emit showWrong();
+        else emit showRight();
+        delay(1000);
+        incorrect = -1;
+    }
     emit gameOver();
     qDebug()<<"Game Over!";
 }
@@ -203,9 +220,9 @@ void GameLogic::loadData()
 {
     QDir dirs;
     dirs.setPath(QDir::currentPath()+"/data/Level0");
-    #if defined(Q_OS_ANDROID)
-        dirs.setPath("assets:/data/Level0");
-    #endif
+#if defined(Q_OS_ANDROID)
+    dirs.setPath("assets:/data/Level0");
+#endif
 
     qDebug()<<"GAME LOADING DATA FROM "+dirs.currentPath();
     foreach(QString directory, dirs.entryList()){
@@ -310,4 +327,10 @@ void GameLogic::skip()
 {
     emit hideSkip();
     nextLevel();
+}
+
+void GameLogic::abortGame()
+{
+    abort = true;
+    finishGame();
 }

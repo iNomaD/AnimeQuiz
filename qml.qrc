@@ -4,4 +4,9 @@
         <file>MenuPage.qml</file>
         <file>GamePage.qml</file>
     </qresource>
+    <qresource prefix="/images">
+        <file>img/bg1.jpeg</file>
+        <file>img/bg2.jpg</file>
+        <file>img/triangle.png</file>
+    </qresource>
 </RCC>

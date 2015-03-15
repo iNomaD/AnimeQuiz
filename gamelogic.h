@@ -37,6 +37,7 @@ public:
     Q_INVOKABLE int getFifty(int x);
     Q_INVOKABLE void fiftyfifty();
     Q_INVOKABLE void skip();
+    Q_INVOKABLE void abortGame();
 
     int getDifficulty() const;
     int getTimeLeft() const;
@@ -58,11 +59,14 @@ private:
     QString ans[4];
     QTime allTimeD;
     QTimer *timer1;
+    bool pause;
+    bool abort;
 
     void nextLevel();
     void finishGame();
     void loadData();
-    void delay( int millisecondsToWait );
+    void delay(int millisecondsToWait);
+    AnimeTitle pickAnime();
 
 signals:
 
