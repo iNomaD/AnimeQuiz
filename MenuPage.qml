@@ -1,6 +1,7 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
+import QtQuick.Controls.Private 1.0
 
 Rectangle {
     anchors.fill: parent
@@ -86,10 +87,41 @@ Rectangle {
                     Image{
                         anchors.left:lvltxt.right
                         anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width*0.15
+                        width: height
                         height: parent.height*0.7
                         source: "images/img/triangle.png"
                     }
+                }
+
+                // drop-down customization here
+                property Component __dropDownStyle: MenuStyle {
+                    __maxPopupHeight: 600
+                    __menuItemType: "comboboxitem"
+
+                    frame: Rectangle {              // background
+                        color: "#FA7A7A"
+                        border.width: 2
+                        radius: 7
+                    }
+
+                    itemDelegate.label:             // an item text
+                        Text {
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        font.bold: true
+                        font.pointSize: 15
+                        font.family: "Courier"
+                        font.capitalization: Font.SmallCaps
+                        color: styleData.selected ? "white" : "black"
+                        text: styleData.text
+                    }
+
+                    itemDelegate.background: Rectangle {  // selection of an item
+                        radius: 2
+                        color: styleData.selected ? "#f81919" : "transparent"
+                    }
+
+                    __scrollerStyle: ScrollViewStyle { }
                 }
             }
             onCurrentIndexChanged: game.difficulty = currentIndex+1

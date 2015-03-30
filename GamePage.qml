@@ -1,6 +1,7 @@
 import QtQuick 2.4
 
 Item{
+    property bool blockBtn: false;
     id: inner
     anchors.fill: parent
 
@@ -15,15 +16,18 @@ Item{
     onGameStart: {
         skip_b.visible = true;
         fifty_b.visible = true;
+        blockBtn = false;
     }
     signal showRight()
     onShowRight: {
         answers.itemAt(game.getCorrect()).state = "right"
+        blockBtn = true;
     }
     signal showWrong()
     onShowWrong: {
         answers.itemAt(game.getCorrect()).state = "right"
         answers.itemAt(game.getIncorrect()).state = "wrong"
+        blockBtn = true;
     }
     signal hideSkip()
     onHideSkip: {
@@ -43,6 +47,7 @@ Item{
             answers.itemAt(i).opacity = 1.0;
             answers.itemAt(i).variant = game.getAns(i+1);
         }
+        blockBtn = false;
     }
 
     Image {
@@ -228,9 +233,9 @@ Item{
                     }
                     MouseArea{
                         anchors.fill: parent
-                        onEntered: parent.border.color = "gold"
+                        onEntered: if(!blockBtn) parent.border.color = "gold"
                         onExited: parent.border.color = "darkblue"
-                        onClicked: game.chosen(index);
+                        onClicked: if(!blockBtn) game.chosen(index)
                     }
                     Gradient {
                         id: gr_normal
