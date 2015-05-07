@@ -3,6 +3,7 @@
 #include <QDir>
 #include "QTime"
 #include <QCoreApplication>
+#include <QApplication>
 
 //#define Q_OS_ANDROID
 
@@ -15,7 +16,8 @@ GameLogic::GameLogic(QObject *parent) : QObject(parent)
     timer1 = new QTimer(this);
     connect(timer1, SIGNAL(timeout()), this, SLOT(timer1000ms()));
 
-    QString imagePath = "file:///"+QDir::currentPath()+"/";
+    curPath = QApplication::applicationDirPath();
+    QString imagePath = "file:///"+curPath+"/";
 #if defined(Q_OS_MAC)
     imagePath = "file://"+imagePath;
 #endif
@@ -219,7 +221,7 @@ void GameLogic::finishGame()
 void GameLogic::loadData()
 {
     QDir dirs;
-    dirs.setPath(QDir::currentPath()+"/data/Level0");
+    dirs.setPath(curPath+"/data/Level0");
 #if defined(Q_OS_ANDROID)
     dirs.setPath("assets:/data/Level0");
 #endif
@@ -236,7 +238,11 @@ void GameLogic::loadData()
             QFile info(title.path()+"/info.txt");
             info.open(QIODevice::ReadOnly);
             QString all = info.readAll();
+
             QStringList line = all.split("\r\n");
+            #ifdef Q_OS_LINUX
+                    line = all.split("\n");
+            #endif
             newTitle.name = line[0];
             newTitle.year = line[1];
             newTitle.top = line[2];

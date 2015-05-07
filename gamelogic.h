@@ -49,6 +49,7 @@ private:
     int timeLeft;
     int guessed;
     QString allTime;
+    QString curPath;
 
     int correct;
     int incorrect;
