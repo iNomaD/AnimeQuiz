@@ -1,0 +1,13 @@
+Package: animequiz
+Version: 0.44
+Installed-Size: 62296
+Section: games
+Maintainer: Denis <wollen@yandex.ru>
+Priority: standard
+Architecture: all
+Depends: libstdc++6-armel-cross (>=4.7.3), libicu-dev (>=52.1), libqt5network5 (>=5.2.1), libqt5gui5 (>=5.2.1), libqt5core5a (>=5.2.1), libqt5qml5 (>=5.2.1), libqt5widgets5 (>=5.3.0)
+Description: Anime Quiz game
+ You need guess anime from 4 pictures.
+
+
+
